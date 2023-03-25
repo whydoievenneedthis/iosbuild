@@ -1,0 +1,55 @@
+name: test ios build
+on:
+  workflow_dispatch:
+  push:
+jobs:
+  iosbuildtest:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+          run_install: false
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Initialize FE
+        run: |
+          pnpm i --frozen-lockfile
+
+      - name: Build FE
+        run: |
+          pnpm nx build --prod
+
+      - name: Create iOS project
+        continue-on-error: true
+        run: |
+          pnpm nx run my-app:add:ios
+
+      - name: Fix broken capacitor generated project
+        run: |
+          ./gradlew fixTheFuckingPodFile
+
+      - name: Finalize iOS project
+        run: |
+          pnpm nx run my-app:sync:ios
+
+      - name: Build iOS app
+        uses: mxcl/xcodebuild@v1
+        with:
+          workspace: apps/my-app/ios/App/App.xcworkspace
+          scheme: App
+          platform: iOS
+          action: build
+          configuration: release
+
+      - name: Upload ios app
+        uses: actions/upload-artifact@v3
+        with:
+          path: /Users/runner/Library/Developer/Xcode/DerivedData
+          retention-days: 5

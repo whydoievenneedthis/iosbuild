@@ -1,0 +1,15 @@
+import java.nio.file.Path
+
+static void fixTheFuckingPodFile(File projectDir) {
+  Path podfile = projectDir.toPath().resolve("apps/my-app/ios/App/Podfile")
+  println "podfile path: " + podfile
+  String contents = podfile.text
+  println "podfile content: " + contents
+  contents = contents.replace("require_relative '", "require_relative '../../")
+  println "new podfile content: " + contents
+  podfile.text = contents
+}
+
+ext {
+  fixTheFuckingPodFile = this.&fixTheFuckingPodFile
+}

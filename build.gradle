@@ -1,0 +1,7 @@
+apply from: 'build-frontend.gradle'
+
+task fixTheFuckingPodFile(group: 'frontend') {
+  doLast {
+    fixTheFuckingPodFile(projectDir)
+  }
+}
